@@ -1,6 +1,6 @@
  name: Update Stock Dashboard
 
-  on:
+  'on':
     schedule:
       - cron: '0 0,4,8,12,16,20 * * *'
      workflow_dispatch:
