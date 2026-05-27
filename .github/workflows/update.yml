@@ -3,7 +3,6 @@
   on:
     schedule:
       - cron: '0 0,4,8,12,16,20 * * *'
-
   jobs:
     update:
       runs-on: ubuntu-latest
