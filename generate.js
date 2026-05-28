@@ -411,7 +411,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 @media(max-width:640px){.chart-pair{grid-template-columns:1fr}}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;box-shadow:var(--shadow)}
 .chart-card-title{font-size:.8rem;font-weight:700;color:var(--text2);margin-bottom:12px}
-.chart-wrap{position:relative;height:200px}
+.chart-wrap{position:relative;height:200px;overflow:hidden}
 
 /* HEATMAP */
 .heat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
@@ -687,7 +687,7 @@ function buildAnalysisCharts(){
   radarChart = new Chart(rCtx,{
     type:'radar',
     data:{ labels:['AI/데이터센터','반도체/IT','방산','에너지','금융','바이오','2차전지','소비재','항공/해운'], datasets:[{ label:'섹터 영향도', data:${radarVals}, backgroundColor:'rgba(124,58,237,.2)', borderColor:'rgba(124,58,237,.8)', pointBackgroundColor:'rgba(124,58,237,1)', pointBorderColor:'#fff', borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:9}}, ticks:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},layout:{padding:10},scales:, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:9}}, ticks:{display:false} } } }
   });
 }
 function updateAnalysisCharts(){
