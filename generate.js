@@ -680,14 +680,14 @@ function buildAnalysisCharts(){
   const mCtx = document.getElementById('macroChart').getContext('2d');
   macroChart = new Chart(mCtx,{
     type:'bar',
-    data:{ labels:${macroLabels}, datasets:[{ data:${macroVals}, backgroundColor:\${macroVals}.map(v=>v>=0?'rgba(22,163,74,.7)':'rgba(220,38,38,.7)'), borderColor:\${macroVals}.map(v=>v>=0?'#16a34a':'#dc2626'), borderWidth:1, borderRadius:6 }] },
+    data:{ labels:${macroLabels}, datasets:[{ data:${macroVals}, backgroundColor:ctx=>ctx.raw>=0?'rgba(22,163,74,.7)':'rgba(220,38,38,.7)', borderColor:ctx=>ctx.raw>=0?'#16a34a':'#dc2626', borderWidth:1, borderRadius:6 }] },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>\`\${ctx.raw>0?'+':''}\${ctx.raw}점\`}} }, scales:{ x:{min:-4,max:4,grid:{color:bc},ticks:{color:tc,font:{size:10},callback:v=>\`\${v>0?'+':''}\${v}\`}}, y:{grid:{display:false},ticks:{color:tc,font:{size:10}}} } }
   });
   const rCtx = document.getElementById('radarChart').getContext('2d');
   radarChart = new Chart(rCtx,{
     type:'radar',
     data:{ labels:['AI/데이터센터','반도체/IT','방산','에너지','금융','바이오','2차전지','소비재','항공/해운'], datasets:[{ label:'섹터 영향도', data:${radarVals}, backgroundColor:'rgba(124,58,237,.2)', borderColor:'rgba(124,58,237,.8)', pointBackgroundColor:'rgba(124,58,237,1)', pointBorderColor:'#fff', borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, layout:{padding:{top:25,bottom:25,left:35,right:35}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:8},padding:10}, ticks:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:9}}, ticks:{display:false} } } }
   });
 }
 function updateAnalysisCharts(){
@@ -729,7 +729,7 @@ async function main() {
     .join('\n');
 
   const analysisRaw = await callClaude(`
-다음 실시간 시장 데이터를 투자 분석해줘. 규칙: 순수JSON만, 마크다운없이, 문자열값은반드시한줄로(줄바꿈금지), 따옴표금지. reason/risk는50자이내한국어:
+다음 실시간 시장 데이터를 바탕으로 한국어로 투자 분석해줘. JSON만 반환해 (마크다운 코드블록 없이):
 
 ${priceSnapshot}
 
@@ -755,22 +755,9 @@ ${priceSnapshot}
   let analysis = null;
   if (analysisRaw) {
     try {
-      const m = analysisRaw.replace(/```json/g,'').replace(/```/g,'').trim().match(/\{[\s\S]*\}/);
-      if (m) {
-        // 문자 하나씩 읽어서 문자열 안의 줄바꿈·탭 제거 (가장 안정적인 방법)
-        let s = m[0], result = '', inStr = false;
-        for (let i = 0; i < s.length; i++) {
-          const c = s[i], prev = i > 0 ? s[i-1] : '';
-          if (c === '"' && prev !== '\\') { inStr = !inStr; result += c; }
-          else if (inStr && (c === '\n' || c === '\r' || c === '\t')) { result += ' '; }
-          else { result += c; }
-        }
-        analysis = JSON.parse(result);
-        console.log('분석 성공! temp:', analysis.temp, '섹터:', Object.keys(analysis.sectorScores||{}).length+'개');
-      }
-    } catch(e) {
-      console.warn('분석 파싱 실패:', e.message);
-    }
+      const m = analysisRaw.match(/\{[\s\S]*\}/);
+      if (m) analysis = JSON.parse(m[0]);
+    } catch(e) { console.warn('분석 파싱 실패:', e.message); }
   }
 
   console.log('[4/4] HTML 생성 중...');
