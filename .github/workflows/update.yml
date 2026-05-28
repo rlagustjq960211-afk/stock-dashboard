@@ -1,7 +1,9 @@
 name: Update Stock Dashboard
-"on":
+
+on:
   schedule:
     - cron: '0 0,4,8,12,16,20 * * *'
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -10,20 +12,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
+
+      - name: Pull latest changes
+        run: git pull --rebase origin main
+
       - name: Install dependencies
         run: npm install
+
       - name: Generate dashboard
         env:
           OUTPUT_PATH: ./index.html
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: node generate.js
+
       - name: Commit and push
         run: |
           git config user.email "action@github.com"
           git config user.name "GitHub Actions"
           git add index.html
-          git diff --staged --quiet || (git commit -m "Update stock dashboard" && git pull --rebase && git push)
+          git diff --staged --quiet || git commit -m "Update stock dashboard"
+          git push
