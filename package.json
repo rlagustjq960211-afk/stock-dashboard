@@ -1,17 +1,7 @@
 {
-  "name": "stock-mcp",
+  "name": "stock-dashboard",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "yahoo-finance2": "^3.14.1"
   }
 }
