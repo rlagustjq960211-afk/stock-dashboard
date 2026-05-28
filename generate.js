@@ -97,7 +97,7 @@ async function callClaude(prompt) {
       headers:{ 'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':key },
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:8000,
+        max_tokens:1000,
         messages:[{ role:'user', content:prompt }]
       })
     });
@@ -411,7 +411,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 @media(max-width:640px){.chart-pair{grid-template-columns:1fr}}
 .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 20px;box-shadow:var(--shadow)}
 .chart-card-title{font-size:.8rem;font-weight:700;color:var(--text2);margin-bottom:12px}
-.chart-wrap{position:relative;height:200px;overflow:hidden}
+.chart-wrap{position:relative;height:200px}
 
 /* HEATMAP */
 .heat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
@@ -466,11 +466,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 /* MODAL — chart */
 .chart-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:1100;align-items:center;justify-content:center;padding:20px}
 .chart-modal-overlay.open{display:flex}
-.chart-modal-box{background:var(--surface);border-radius:18px;max-width:640px;width:100%;padding:28px 16px;box-sizing:border-box;overflow:hidden;
+.chart-modal-box{background:var(--surface);border-radius:18px;max-width:640px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:springIn .35s cubic-bezier(.34,1.56,.64,1)}
 .chart-modal-title{font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px}
 .chart-modal-price{font-size:1.8rem;font-weight:900;color:var(--text);margin-bottom:2px}
 .chart-modal-chg{font-size:.9rem;font-weight:700;margin-bottom:16px}
-.chart-modal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
+.chart-modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
 .stat-cell{background:var(--surface2);border-radius:8px;padding:10px 12px;text-align:center}
 .stat-label{font-size:.65rem;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
 .stat-val{font-size:.85rem;font-weight:700;color:var(--text)}
@@ -687,7 +687,7 @@ function buildAnalysisCharts(){
   radarChart = new Chart(rCtx,{
     type:'radar',
     data:{ labels:['AI/데이터센터','반도체/IT','방산','에너지','금융','바이오','2차전지','소비재','항공/해운'], datasets:[{ label:'섹터 영향도', data:${radarVals}, backgroundColor:'rgba(124,58,237,.2)', borderColor:'rgba(124,58,237,.8)', pointBackgroundColor:'rgba(124,58,237,1)', pointBorderColor:'#fff', borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},layout:{padding:{top:20,bottom:20,left:30,right:30}},,scales:, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:8},padding:8}, ticks:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, layout:{padding:{top:25,bottom:25,left:35,right:35}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:8},padding:10}, ticks:{display:false} } } }
   });
 }
 function updateAnalysisCharts(){
@@ -723,7 +723,6 @@ async function main() {
   }));
 
   console.log('[3/4] Claude AI 분석 중...');
-  console.log('API 키 존재:', !!process.env.ANTHROPIC_API_KEY);
   const priceSnapshot = Object.entries(data)
     .filter(([,d])=>d.ok)
     .map(([k,d])=>`${d.label}: ${fmtPrice(d.price,d.fmt)} (${d.pct>=0?'+':''}${d.pct.toFixed(2)}%)`)
@@ -752,8 +751,7 @@ ${priceSnapshot}
     "shipping":{"reason":"...","tags":[...],"risk":"..."}
   }
 }`);
-  console.log('Claude 응답 길이:', analysisRaw?.length ?? 0);
-  console.log('Claude 응답 앞부분:', analysisRaw?.slice(0,200));
+
   let analysis = null;
   if (analysisRaw) {
     try {
