@@ -466,11 +466,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 /* MODAL — chart */
 .chart-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:1100;align-items:center;justify-content:center;padding:20px}
 .chart-modal-overlay.open{display:flex}
-.chart-modal-box{background:var(--surface);border-radius:18px;max-width:640px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:springIn .35s cubic-bezier(.34,1.56,.64,1)}
+.chart-modal-box{background:var(--surface);border-radius:18px;max-width:640px;width:100%;padding:28px 16px;box-sizing:border-box;overflow:hidden;
 .chart-modal-title{font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px}
 .chart-modal-price{font-size:1.8rem;font-weight:900;color:var(--text);margin-bottom:2px}
 .chart-modal-chg{font-size:.9rem;font-weight:700;margin-bottom:16px}
-.chart-modal-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.chart-modal-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px}
 .stat-cell{background:var(--surface2);border-radius:8px;padding:10px 12px;text-align:center}
 .stat-label{font-size:.65rem;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
 .stat-val{font-size:.85rem;font-weight:700;color:var(--text)}
