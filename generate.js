@@ -723,6 +723,7 @@ async function main() {
   }));
 
   console.log('[3/4] Claude AI 분석 중...');
+  console.log('API 키 존재:', !!process.env.ANTHROPIC_API_KEY);
   const priceSnapshot = Object.entries(data)
     .filter(([,d])=>d.ok)
     .map(([k,d])=>`${d.label}: ${fmtPrice(d.price,d.fmt)} (${d.pct>=0?'+':''}${d.pct.toFixed(2)}%)`)
@@ -751,7 +752,8 @@ ${priceSnapshot}
     "shipping":{"reason":"...","tags":[...],"risk":"..."}
   }
 }`);
-
+  console.log('Claude 응답 길이:', analysisRaw?.length ?? 0);
+  console.log('Claude 응답 앞부분:', analysisRaw?.slice(0,200));
   let analysis = null;
   if (analysisRaw) {
     try {
