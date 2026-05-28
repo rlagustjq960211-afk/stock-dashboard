@@ -680,7 +680,7 @@ function buildAnalysisCharts(){
   const mCtx = document.getElementById('macroChart').getContext('2d');
   macroChart = new Chart(mCtx,{
     type:'bar',
-    data:{ labels:${macroLabels}, datasets:[{ data:${macroVals}, backgroundColor:ctx=>ctx.raw>=0?'rgba(22,163,74,.7)':'rgba(220,38,38,.7)', borderColor:ctx=>ctx.raw>=0?'#16a34a':'#dc2626', borderWidth:1, borderRadius:6 }] },
+    data:{ labels:${macroLabels}, datasets:[{ data:${macroVals}, backgroundColor:\${macroVals}.map(v=>v>=0?'rgba(22,163,74,.7)':'rgba(220,38,38,.7)'), borderColor:\${macroVals}.map(v=>v>=0?'#16a34a':'#dc2626'), borderWidth:1, borderRadius:6 }] },
     options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>\`\${ctx.raw>0?'+':''}\${ctx.raw}점\`}} }, scales:{ x:{min:-4,max:4,grid:{color:bc},ticks:{color:tc,font:{size:10},callback:v=>\`\${v>0?'+':''}\${v}\`}}, y:{grid:{display:false},ticks:{color:tc,font:{size:10}}} } }
   });
   const rCtx = document.getElementById('radarChart').getContext('2d');
@@ -729,7 +729,7 @@ async function main() {
     .join('\n');
 
   const analysisRaw = await callClaude(`
-다음 실시간 시장 데이터를 바탕으로 투자 분석해줘. 반드시 순수 JSON만 반환해. 규칙: 1) 마크다운 코드블록 없이 2) 문자열 값 안에 큰따옴표 사용 금지 3) 줄바꿈 없이 한 줄로 된 문자열만 4) 특수문자 없이 일반 텍스트만:
+다음 실시간 시장 데이터를 투자 분석해줘. 규칙: 순수JSON만, 마크다운없이, 문자열값은반드시한줄로(줄바꿈금지), 따옴표금지. reason/risk는50자이내한국어:
 
 ${priceSnapshot}
 
@@ -755,31 +755,21 @@ ${priceSnapshot}
   let analysis = null;
   if (analysisRaw) {
     try {
-      // 마크다운 코드블록 제거
-      let cleaned = analysisRaw.replace(/```json/g,'').replace(/```/g,'').trim();
-      // JSON 블록 추출
-      const m = cleaned.match(/\{[\s\S]*\}/);
+      const m = analysisRaw.replace(/```json/g,'').replace(/```/g,'').trim().match(/\{[\s\S]*\}/);
       if (m) {
-        let jsonStr = m[0];
-        // 문자열 값 안의 줄바꿈 제거 (JSON 파싱 오류 원인)
-        jsonStr = jsonStr.replace(/([":,\[\{]\s*)"([^"]*?)"/gs, (match, pre, val) => {
-          const fixed = val.replace(/\n/g,' ').replace(/\r/g,'').replace(/\t/g,' ');
-          return pre + '"' + fixed + '"';
-        });
-        analysis = JSON.parse(jsonStr);
-        console.log('분석 성공! temp:', analysis.temp);
+        // 문자 하나씩 읽어서 문자열 안의 줄바꿈·탭 제거 (가장 안정적인 방법)
+        let s = m[0], result = '', inStr = false;
+        for (let i = 0; i < s.length; i++) {
+          const c = s[i], prev = i > 0 ? s[i-1] : '';
+          if (c === '"' && prev !== '\\') { inStr = !inStr; result += c; }
+          else if (inStr && (c === '\n' || c === '\r' || c === '\t')) { result += ' '; }
+          else { result += c; }
+        }
+        analysis = JSON.parse(result);
+        console.log('분석 성공! temp:', analysis.temp, '섹터:', Object.keys(analysis.sectorScores||{}).length+'개');
       }
     } catch(e) {
       console.warn('분석 파싱 실패:', e.message);
-      // 파싱 실패시 Claude에게 더 단순한 형식으로 재요청
-      try {
-        const simpleRaw = await callClaude(`아래 JSON을 파싱 오류 없이 수정해서 반환해줘. 반드시 순수 JSON만, 마크다운 없이, 문자열 안에 따옴표나 줄바꿈 없이:\n${analysisRaw?.slice(0,2000)}`);
-        const m2 = simpleRaw?.match(/\{[\s\S]*\}/);
-        if (m2) analysis = JSON.parse(m2[0]);
-        if (analysis) console.log('재시도 성공! temp:', analysis.temp);
-      } catch(e2) {
-        console.warn('재시도도 실패:', e2.message);
-      }
     }
   }
 
