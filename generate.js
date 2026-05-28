@@ -729,7 +729,7 @@ async function main() {
     .join('\n');
 
   const analysisRaw = await callClaude(`
-다음 실시간 시장 데이터를 바탕으로 한국어로 투자 분석해줘. JSON만 반환해 (마크다운 코드블록 없이):
+다음 실시간 시장 데이터를 바탕으로 투자 분석해줘. 반드시 순수 JSON만 반환해. 규칙: 1) 마크다운 코드블록 없이 2) 문자열 값 안에 큰따옴표 사용 금지 3) 줄바꿈 없이 한 줄로 된 문자열만 4) 특수문자 없이 일반 텍스트만:
 
 ${priceSnapshot}
 
@@ -755,9 +755,32 @@ ${priceSnapshot}
   let analysis = null;
   if (analysisRaw) {
     try {
-      const m = analysisRaw.match(/\{[\s\S]*\}/);
-      if (m) analysis = JSON.parse(m[0]);
-    } catch(e) { console.warn('분석 파싱 실패:', e.message); }
+      // 마크다운 코드블록 제거
+      let cleaned = analysisRaw.replace(/```json/g,'').replace(/```/g,'').trim();
+      // JSON 블록 추출
+      const m = cleaned.match(/\{[\s\S]*\}/);
+      if (m) {
+        let jsonStr = m[0];
+        // 문자열 값 안의 줄바꿈 제거 (JSON 파싱 오류 원인)
+        jsonStr = jsonStr.replace(/([":,\[\{]\s*)"([^"]*?)"/gs, (match, pre, val) => {
+          const fixed = val.replace(/\n/g,' ').replace(/\r/g,'').replace(/\t/g,' ');
+          return pre + '"' + fixed + '"';
+        });
+        analysis = JSON.parse(jsonStr);
+        console.log('분석 성공! temp:', analysis.temp);
+      }
+    } catch(e) {
+      console.warn('분석 파싱 실패:', e.message);
+      // 파싱 실패시 Claude에게 더 단순한 형식으로 재요청
+      try {
+        const simpleRaw = await callClaude(`아래 JSON을 파싱 오류 없이 수정해서 반환해줘. 반드시 순수 JSON만, 마크다운 없이, 문자열 안에 따옴표나 줄바꿈 없이:\n${analysisRaw?.slice(0,2000)}`);
+        const m2 = simpleRaw?.match(/\{[\s\S]*\}/);
+        if (m2) analysis = JSON.parse(m2[0]);
+        if (analysis) console.log('재시도 성공! temp:', analysis.temp);
+      } catch(e2) {
+        console.warn('재시도도 실패:', e2.message);
+      }
+    }
   }
 
   console.log('[4/4] HTML 생성 중...');
