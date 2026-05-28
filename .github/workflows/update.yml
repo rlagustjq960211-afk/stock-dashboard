@@ -3,6 +3,7 @@ name: Update Stock Dashboard
 on:
   schedule:
     - cron: '0 0,4,8,12,16,20 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,14 +30,16 @@ jobs:
 
       - name: Generate dashboard
         env:
-          OUTPUT_PATH: ./index.html
+          OUTPUT_PATH: ./deploy/index.html
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: node generate.js
+        run: |
+          mkdir -p deploy
+          node generate.js
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: './deploy'
 
       - name: Deploy to GitHub Pages
         id: deployment
