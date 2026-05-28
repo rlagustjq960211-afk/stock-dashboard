@@ -97,7 +97,7 @@ async function callClaude(prompt) {
       headers:{ 'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':key },
       body: JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
+        max_tokens:8000,
         messages:[{ role:'user', content:prompt }]
       })
     });
