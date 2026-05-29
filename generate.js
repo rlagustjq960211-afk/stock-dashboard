@@ -687,7 +687,7 @@ function buildAnalysisCharts(){
   radarChart = new Chart(rCtx,{
     type:'radar',
     data:{ labels:['AI/데이터센터','반도체/IT','방산','에너지','금융','바이오','2차전지','소비재','항공/해운'], datasets:[{ label:'섹터 영향도', data:${radarVals}, backgroundColor:'rgba(124,58,237,.2)', borderColor:'rgba(124,58,237,.8)', pointBackgroundColor:'rgba(124,58,237,1)', pointBorderColor:'#fff', borderWidth:2 }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:9}}, ticks:{display:false} } } }
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, layout:{padding:{top:20,bottom:20,left:30,right:30}}, scales:{ r:{ min:0,max:5, angleLines:{color:bc}, grid:{color:bc}, pointLabels:{color:tc,font:{size:8},padding:8}, ticks:{display:false} } } }
   });
 }
 function updateAnalysisCharts(){
